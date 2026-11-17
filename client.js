@@ -353,6 +353,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
         connection.parentEmail +
         " · This tablet is linked to your test family.",
     );
+    setTimeout(()=>window.dispatchEvent(new Event("parent-email-signed-in")),0);
     return structuredClone(connection);
   }
   async function emailRegister(email,password){
