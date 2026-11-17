@@ -136,6 +136,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
       id: operationId(),
       type,
       data,
+      familyEpoch: connection.familyEpoch||null,
       actor: connection.role === "parent" ? "parent" : connection.member,
     });
   }
@@ -226,6 +227,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
       const active = state.active;
       const timers = state.timers;
       state = snapshot.state;
+      connection.familyEpoch=state.restoreEpoch||null;
       if(connection.role==="parent")connection.parentLabel=snapshot.parentLabel||"Parent";
       if (
         connection.role === "parent" &&
@@ -437,6 +439,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
       id: operationId(),
       type,
       data,
+      familyEpoch:connection.familyEpoch||null,
     });
     if (!result.ok) {
       conflicts.push(result);
@@ -487,8 +490,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
       if (
         d.delete ||
         d.removeReward ||
-        d.override ||
-        button.id === "openBackupMenu"
+        d.override
       ) {
         e.preventDefault();
         e.stopImmediatePropagation();
