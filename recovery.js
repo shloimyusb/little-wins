@@ -1,0 +1,15 @@
+(() => {
+ const $=id=>document.getElementById(id),sync=window.prototypeSync;
+ const dialog=document.createElement('dialog');dialog.className='preview-dialog';dialog.id='passwordRecovery';
+ dialog.innerHTML='<form id="recoveryForm"><h2 id="recoveryTitle">Reset your password</h2><p id="recoveryHelp">We’ll send a reset link to your parent email.</p><div id="recoveryEmailField"><label for="recoveryEmail">Parent email</label><input id="recoveryEmail" type="email" maxlength="254" autocomplete="username"></div><div id="recoveryNewFields" hidden><label for="recoveryNew">New password</label><input id="recoveryNew" type="password" minlength="10" maxlength="128" autocomplete="new-password"><label for="recoveryRepeat">Confirm password</label><input id="recoveryRepeat" type="password" minlength="10" maxlength="128" autocomplete="new-password"></div><p class="preview-error" id="recoveryError" role="alert"></p><div class="actions"><button type="button" class="btn" id="recoveryCancel">Cancel</button><button class="btn primary" id="recoverySave">Send reset link</button></div></form>';
+ document.body.append(dialog);let resetMode=false,busy=false;
+ function open(reset){resetMode=reset;$('recoveryForm').reset();$('recoveryError').textContent='';$('recoveryError').style.color='';$('recoveryEmailField').hidden=reset;$('recoveryNewFields').hidden=!reset;$('recoveryEmail').disabled=reset;$('recoveryEmail').required=!reset;for(const id of ['recoveryNew','recoveryRepeat']){$(id).disabled=!reset;$(id).required=reset;}$('recoverySave').textContent=reset?'Save new password':'Send reset link';$('recoveryHelp').textContent=reset?'Choose at least 10 characters. Current sign-in sessions will be signed out; account PINs stay the same.':'We’ll send a reset link if that parent email has an account.';$('recoveryEmail').value=$('welcomeEmail').value;dialog.showModal();}
+ $('welcomeForgot').onclick=()=>open(false);$('recoveryCancel').onclick=()=>dialog.close();
+ dialog.addEventListener('close',()=>{recoveryAuth=null;for(const id of ['recoveryNew','recoveryRepeat'])$(id).value='';});
+ $('recoveryForm').onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;$('recoverySave').disabled=true;try{
+  if(resetMode){if($('recoveryNew').value!==$('recoveryRepeat').value)throw Error('The passwords do not match.');await sync.completePasswordReset($('recoveryNew').value);await sync.logout();dialog.close();toast('Password updated. Sign in with your new password, or use an account PIN.');}
+  else{await sync.requestPasswordReset($('recoveryEmail').value);$('recoveryError').style.color='#216d54';$('recoveryError').textContent='Check your email for the reset link. It may take a few minutes.';}
+ }catch(error){$('recoveryError').textContent=error.message;}finally{busy=false;$('recoverySave').disabled=false;}};
+ if(window.cloudAuthNotice==='recovery')open(true);
+ else if(window.cloudAuthNotice){$('welcomeError').style.color='#216d54';$('welcomeError').textContent=window.cloudAuthNotice;}
+})();
