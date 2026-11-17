@@ -105,6 +105,8 @@ async function cloudJoinFamily(email,password,code,deviceToken){
     "dailyLimit",
     "weeklyLimit",
     "deadline",
+    "timerRequired",
+    "minutes",
   ];
   function status(message) {
     $p("protoStatus").textContent =
@@ -123,7 +125,10 @@ async function cloudJoinFamily(email,password,code,deviceToken){
   }
   async function api(path,data,token=connection.sessionToken){
     const device=path==='login'||path==='device/accounts';
-    return cloudRPC('lw_api',{p_action:path,p_data:data||{},p_device_token:device?token:null,p_session_token:device?null:token});
+    const sent=Date.now();
+    const result=await cloudRPC('lw_api',{p_action:path,p_data:data||{},p_device_token:device?token:null,p_session_token:device?null:token});
+    if(result.timerSyncVersion===1){window.timerSyncVersion=1;window.serverTimerOffset=result.serverNowMs-(sent+Date.now())/2;window.refreshServerTimerClock?.(window.serverTimerOffset);}
+    return result;
   }
   function enqueue(type, data) {
     if (!connection.sessionToken) return;
@@ -215,6 +220,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
     return oldPersist();
   };
   function accept(snapshot) {
+    if(snapshot.revision<connection.revision)return;
     applying = true;
     try {
       const active = state.active;
@@ -226,10 +232,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
         state.members.some((m) => m.id === active)
       )
         state.active = active;
-      // Timer handoff is deliberately excluded; retain local timers rather than pretending to share them.
-      state.timers = timers.filter(
-        (t) => connection.role === "parent" || t.member === connection.member,
-      );
+      if(window.timerSyncVersion===1)state.timers=window.projectServerTimers?.(state.timers,window.serverTimerOffset||0)||state.timers.map(t=>({...t,serverEnds:t.ends,ends:t.ends-(window.serverTimerOffset||0)}));
       connection.revision = snapshot.revision;
       baseline = structuredClone(state);
       oldPersist();
