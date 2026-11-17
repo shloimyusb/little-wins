@@ -220,6 +220,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
       const active = state.active;
       const timers = state.timers;
       state = snapshot.state;
+      if(connection.role==="parent")connection.parentLabel=snapshot.parentLabel||"Parent";
       if (
         connection.role === "parent" &&
         state.members.some((m) => m.id === active)

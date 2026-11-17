@@ -1158,7 +1158,7 @@ function renderParent() {
         (a.undoneAt ? "Undone: " : a.reversalOf ? "Reversal: " : "") +
         (a.delta < 0 ? "−" + -a.delta : "+" + a.delta) +
         " points · " +
-        a.reason,
+        a.reason + " · By " + (a.parentLabel || "Parent"),
     })),
   ].sort(
     (a, b) =>
@@ -1348,7 +1348,7 @@ function renderChildWeek(visible) {
     ...adjustments.map((a) => ({
       day: a.day || localDayAt(a.at),
       at: a.at,
-      title: a.reason,
+      title: a.reason + " · By " + (a.parentLabel || "Parent"),
       label:
         (a.reversalOf
           ? "Adjustment reversed · "
@@ -3343,7 +3343,7 @@ function showDeductions() {
   $("deductionList").innerHTML = pending
     .map(
       (a) =>
-        `<div class="history-row"><b>${-a.delta} points deducted</b><p>Reason: ${esc(a.reason)}</p><small>${esc(new Date(a.at).toLocaleString())}</small></div>`,
+        `<div class="history-row"><b>${-a.delta} points deducted by ${esc(a.parentLabel || "Parent")}</b><p>Reason: ${esc(a.reason)}</p><small>${esc(new Date(a.at).toLocaleString())}</small></div>`,
     )
     .join("");
   $("deductionDialog").showModal();
@@ -4065,7 +4065,7 @@ $("exportHistory").onclick = () => {
       [
         state.members.find((m) => m.id === a.member)?.name || a.member,
         "Point adjustment",
-        a.reason,
+        a.reason + " · By " + (a.parentLabel || "Parent"),
         a.delta,
         "",
         new Date(a.at).toISOString(),

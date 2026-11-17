@@ -1,5 +1,5 @@
 /* Versioned public shell only. Supabase Auth/API traffic is never cached. */
-const CACHE='little-wins-supabase-5d20a4b45a76';
+const CACHE='little-wins-supabase-3703affb3be3';
 const BASE=new URL('./',self.registration.scope);
 const FILES=['./','config.js','client.js','tablet.js','pwa.js','recovery.js','parents.js','ios.css','manifest.webmanifest',...['32','180','192','512'].map(size=>'icons/icon-'+size+'.png'),...['classic','gentle','bell','cheerful','beep','sparkle','victory','doorbell','robot','arcade','soft','triple'].map(name=>'sounds/'+name+'.wav')];
 const urls=FILES.map(path=>new URL(path,BASE).href),paths=new Set(urls.map(url=>new URL(url).pathname));

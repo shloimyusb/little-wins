@@ -17,7 +17,7 @@
   };
   const accountName = (id) =>
     id === "parent"
-      ? "Parent"
+      ? (sync.connection.parentLabel || "Parent")
       : state.members.find((m) => m.id === id)?.name || "Child";
   const showError = (id, error) =>
     ($(id).textContent = error.message || String(error));
@@ -51,7 +51,7 @@
     $("previewSync").dataset.state = kind;
     $("familyEmail").textContent =
       parentMode && connection.parentEmail
-        ? connection.parentEmail
+        ? (connection.parentLabel && connection.parentLabel!=="Parent" ? connection.parentLabel+" · " : "") + connection.parentEmail
         : "Your family";
     $("familySyncState").textContent = offline
       ? "You’re offline. Saved changes will sync when this tablet reconnects."

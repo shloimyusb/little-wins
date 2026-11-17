@@ -17,7 +17,13 @@
   try{
    const r=await sync.api('parents/list');
    if(!r.ok)throw Error('Parent email access needs the second-parent database update.');
-   $('parentEmails').replaceChildren(...r.parents.map(p=>{const el=document.createElement('p');el.textContent=p.email+(p.owner?' (original parent)':' (second parent)');return el;}));
+   $('parentEmails').replaceChildren(...r.parents.map(p=>{
+    const row=document.createElement('form'),label=document.createElement('label'),select=document.createElement('select'),button=document.createElement('button');
+    label.textContent=p.email+' — display name';select.setAttribute('aria-label','Display name for '+p.email);
+    for(const name of ['Parent','Mommy','Totty']){const option=document.createElement('option');option.value=name;option.textContent=name;option.disabled=name==='Parent';select.append(option);}
+    select.value=p.label||'Parent';button.type='submit';button.className='text-btn';button.textContent='Save name';
+    label.append(select);row.append(label,button);row.onsubmit=e=>{e.preventDefault();run('parents/label',{parentId:p.parentId,label:select.value});};return row;
+   }));
    $('parentInviteForm').hidden=r.parents.length>=2;$('parentRemove').hidden=r.parents.length<2;
    $('parentInviteCancel').hidden=!r.invitation;
    if(r.invitation)$('parentAccessMessage').textContent='An invitation is waiting for '+r.invitation.email+'. Create a new invitation if you need a new code.';
@@ -30,6 +36,7 @@
    const r=await sync.api(action,data);if(!r.ok)throw Error(r.message);
    await refresh();
    if(r.code){$('parentInviteCode').value=r.code;$('parentInviteCodeWrap').hidden=false;$('parentAccessMessage').textContent='Invitation created for '+r.email+'.';}
+   else if(action==='parents/label'){await sync.sync();window.tabletPreview?.refresh();$('parentAccessMessage').textContent='Parent name saved. New point adjustments will show this name to the kids.';}
    else $('parentAccessMessage').textContent=action==='parents/remove'?'Second parent removed. Their linked devices can no longer access this family.':'Invitation canceled.';
   }catch(e){$('parentAccessMessage').textContent=e.message;}
   finally{busy=false;for(const b of section.querySelectorAll('button'))b.disabled=false;}
