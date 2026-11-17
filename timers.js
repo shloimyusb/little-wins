@@ -38,7 +38,7 @@
  }
  document.addEventListener('click',event=>{
   const b=event.target.closest('button');if(!b)return;const d=b.dataset;
-  const timedComplete=d.complete&&state.chores.some(c=>c.id===d.complete&&c.timerRequired!==false);
+  const timedComplete=d.complete&&(state.chores.some(c=>c.id===d.complete&&c.timerRequired!==false)||state.timers.some(t=>t.chore===d.complete&&t.member===state.active&&!t.completed));
   if(!d.start&&!d.cancelTimer&&!d.togglePause&&!timedComplete)return;
   event.preventDefault();event.stopImmediatePropagation();act(b);
  },true);

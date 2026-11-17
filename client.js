@@ -147,6 +147,8 @@ async function cloudJoinFamily(email,password,code,deviceToken){
       const before = oldCompletions.get(c.id);
       if (!before) {
         const chore = baseline.chores.find((x) => x.id === c.chore);
+        const completionTimer = !c.manualCredit && baseline.timers.find(t =>
+          t.member === c.member && t.chore === c.chore && !t.completed);
         enqueue(c.manualCredit ? "creditChore" : "completeChore", {
           member: c.member,
           chore: c.chore,
@@ -154,6 +156,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
           completedAt: c.completedAt,
           day: c.day,
           choreVersion: chore?.syncVersion,
+          ...(completionTimer ? {timerId: completionTimer.id, timerVersion: completionTimer.version} : {}),
           overrideLimit: !!document.getElementById("creditOverrideLimit")
             ?.checked,
         });
