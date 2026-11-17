@@ -46,6 +46,12 @@ async function cloudResetPassword(password){
  await cloudRequest('/auth/v1/user',{password},{jwt:recoveryAuth,method:'PUT'});
  await cloudRPC('lw_parent_revoke_sessions',{},recoveryAuth);recoveryAuth=null;
 }
+// Joining never initializes a second family. Only the verified invited email can accept.
+async function cloudJoinFamily(email,password,code,deviceToken){
+ const auth=await cloudRequest('/auth/v1/token?grant_type=password',{email:email.trim(),password});
+ await cloudRPC('lw_parent_accept_invite',{p_code:code.trim().toLowerCase()},auth.access_token);
+ return cloudParentConnect(auth.access_token,{deviceToken});
+}
 
 /* Isolated test adapter. The released app and its storage are never edited. */
 (() => {
@@ -358,6 +364,10 @@ async function cloudResetPassword(password){
     const result=await cloudSignIn(email,password,connection.deviceToken);if(result.needsFamilySetup)return result;
     return adoptEmailAccount(result);
   }
+  async function joinFamily(email,password,code){
+    if(busy||outbox.length)throw Error("Sync saved changes before joining a family.");
+    return adoptEmailAccount(await cloudJoinFamily(email,password,code,connection.deviceToken));
+  }
   async function finishFamilySetup(parentPin,childPin){
     const result=await cloudFinishSetup(syntheticSeed(),parentPin,childPin);return adoptEmailAccount(result);
   }
@@ -543,6 +553,7 @@ async function cloudResetPassword(password){
     api,
     emailRegister,
     emailLogin,
+    joinFamily,
     finishFamilySetup,
     cancelSetup:()=>{pendingParentAuth=null},
     requestPasswordReset:cloudResetEmail,

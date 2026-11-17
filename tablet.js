@@ -84,7 +84,10 @@
     } catch {}
   }
   function setMode(value) {
-    mode=value;const create=mode==='create',setup=mode==='setup';
+    mode=value;const create=mode==='create',setup=mode==='setup',join=mode==='join';
+    document.getElementById('joinCodeWrap')?.toggleAttribute('hidden',!join);
+    const jc=document.getElementById('joinCode');if(jc){jc.disabled=!join;jc.required=join;}
+    document.getElementById('welcomeJoinHelp')?.toggleAttribute('hidden',!join);
     $('welcomeCreateTab').textContent='Create account';
     $('welcomeCreateTab').setAttribute('aria-selected',String(create));$('welcomeSignInTab').setAttribute('aria-selected',String(!create));
     $('welcomeCreateTab').parentElement.hidden=setup;
@@ -95,7 +98,7 @@
     $('welcomePassword').minLength=create?10:1;$('welcomePassword').autocomplete=create?'new-password':'current-password';
     $('welcomeTitle').textContent=setup?'Choose your family PINs':'Welcome to Little Wins';
     $('welcomeHelp').textContent=setup?'Your email is verified. Choose a Parent PIN and a starting child PIN to finish setting up your family.':'Connect this device to your family. Your chores, points and rewards stay together.';
-    $('welcomeSubmit').textContent=setup?'Save family PINs':create?'Create parent account':'Sign in';
+    $('welcomeSubmit').textContent=setup?'Save family PINs':create?'Create parent account':join?'Join existing family':'Sign in';
     $('welcomeForgot').hidden=create||setup;$('welcomeError').textContent='';$('welcomeError').style.color='';
     $('welcomeBack').hidden=!sync.connection.deviceToken&&!setup;
   }
@@ -155,6 +158,7 @@
   }
   $("welcomeSignInTab").onclick = () => setMode("signin");
   $("welcomeCreateTab").onclick = () => setMode("create");
+  window.showParentJoin=()=>setMode("join");
   $("welcomeShowPassword").onchange = () => {
     $("welcomePassword").type = $("welcomeShowPassword").checked
       ? "text"
@@ -165,6 +169,7 @@
     try{
       let result;
       if(mode==='setup')result=await sync.finishFamilySetup($('initialParentPin').value,$('initialChildPin').value);
+      else if(mode==='join')result=await sync.joinFamily($('welcomeEmail').value,$('welcomePassword').value,$('joinCode').value);
       else if(mode==='create')result=await sync.emailRegister($('welcomeEmail').value,$('welcomePassword').value);
       else result=await sync.emailLogin($('welcomeEmail').value,$('welcomePassword').value);
       $('welcomePassword').value='';
