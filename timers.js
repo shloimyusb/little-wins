@@ -22,7 +22,9 @@
    if(d.start){const c=state.chores.find(c=>c.id===d.start);if(!c)throw Error('Chore was removed.');type='startTimer';data={member,chore:c.id,choreVersion:c.syncVersion};
     try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();}catch{}
    }else{
-    const t=state.timers.find(t=>t.id===(d.cancelTimer||d.togglePause)||d.complete&&t.chore===d.complete&&t.member===member);
+    const requestedId=d.cancelTimer||d.togglePause;
+    // Imported history retains completed timers. Match the same active entry as the UI.
+    const t=state.timers.find(t=>!t.completed&&t.member===member&&(requestedId?t.id===requestedId:t.chore===d.complete));
     if(!t)throw Error('Timer was completed or canceled on another device.');
     type=d.cancelTimer?'cancelTimer':d.togglePause?(timerPaused(t)?'resumeTimer':'pauseTimer'):'completeChore';
     if(type==='cancelTimer'&&!confirm('Cancel this chore timer? No points will be awarded.'))return;
