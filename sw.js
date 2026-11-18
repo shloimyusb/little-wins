@@ -1,7 +1,7 @@
 /* Versioned public shell only. Supabase Auth/API traffic is never cached. */
-const CACHE='little-wins-supabase-1a6cb7a5fadd';
+const CACHE='little-wins-supabase-d82d49e15be6';
 const BASE=new URL('./',self.registration.scope);
-const FILES=['./','config.js','client.js','tablet.js','pwa.js','recovery.js','parents.js','timers.js','backup-import.js','ios.css','manifest.webmanifest',...['32','180','192','512'].map(size=>'icons/icon-'+size+'.png'),...['classic','gentle','bell','cheerful','beep','sparkle','victory','doorbell','robot','arcade','soft','triple'].map(name=>'sounds/'+name+'.wav')];
+const FILES=['./','config.js','client.js','tablet.js','pwa.js','recovery.js','parents.js','timers.js','backup-import.js','photos.js','remove-items.js','live-actions.js','ios.css','manifest.webmanifest',...['32','180','192','512'].map(size=>'icons/icon-'+size+'.png'),...['classic','gentle','bell','cheerful','beep','sparkle','victory','doorbell','robot','arcade','soft','triple'].map(name=>'sounds/'+name+'.wav')];
 const urls=FILES.map(path=>new URL(path,BASE).href),paths=new Set(urls.map(url=>new URL(url).pathname));
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(urls);for(const client of await self.clients.matchAll({includeUncontrolled:true}))client.postMessage({type:'UPDATE_CACHED'});})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('little-wins-supabase-')&&key!==CACHE)await caches.delete(key);await self.clients.claim();for(const client of await self.clients.matchAll())client.postMessage({type:'OFFLINE_READY'});})()));

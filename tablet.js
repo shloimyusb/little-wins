@@ -325,7 +325,7 @@
       $("tabletPinDialog").close();
       if (parentMode) signOut();
     },
-    refresh: refreshStatus,
+    refresh: async()=>{await refreshAccounts();refreshStatus();},
   };
   refreshAccounts().then(() => {
     render();

@@ -53,9 +53,9 @@ async function cloudJoinFamily(email,password,code,deviceToken){
  return cloudParentConnect(auth.access_token,{deviceToken});
 }
 
-/* Isolated test adapter. The released app and its storage are never edited. */
+/* Family synchronization client. */
 (() => {
-  const manual = new URLSearchParams(location.search).has("manual");
+  const manual = false;
   const K = "little-wins-cloud-connection",
     Q = "little-wins-cloud-outbox",
     C = "little-wins-cloud-conflicts";
@@ -359,7 +359,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
     status(
       "Signed in as " +
         connection.parentEmail +
-        " · This tablet is linked to your test family.",
+        " · This device is linked to your family.",
     );
     setTimeout(()=>window.dispatchEvent(new Event("parent-email-signed-in")),0);
     return structuredClone(connection);
@@ -396,7 +396,7 @@ async function cloudJoinFamily(email,password,code,deviceToken){
   }
   async function create() {
     if (connection.deviceToken)
-      throw Error("This test browser is already paired.");
+      throw Error("This device is already connected.");
     const seed = structuredClone(state);
     seed.completions = [];
     seed.rewardRequests = [];
@@ -462,46 +462,14 @@ async function cloudJoinFamily(email,password,code,deviceToken){
     $p("protoRole").value = id;
     $p("protoPin").value = "";
     $p("protoPin").focus();
-    status("Enter the test account PIN above to sign in.");
+    status("Choose an account and enter its PIN.");
   };
   chooseParent = function () {
     $p("protoRole").value = "parent";
     $p("protoPin").value = "";
     $p("protoPin").focus();
-    status("Enter the test Parent PIN above.");
+    status("Choose Parent and enter your PIN.");
   };
-  const realOpenForm = openForm;
-  openForm = function (type, id) {
-    if (type === "member" || !id) {
-      toast(
-        "Adding accounts, chores and rewards is outside this test prototype.",
-      );
-      return;
-    }
-    realOpenForm(type, id);
-    if (type === "chore") {
-      $("timerRequired").disabled = true;
-      $("minutes").disabled = true;
-    }
-  };
-  document.addEventListener(
-    "click",
-    (e) => {
-      const button = e.target.closest("button");
-      if (!button) return;
-      const d = button.dataset;
-      if (
-        d.delete ||
-        d.removeReward ||
-        d.override
-      ) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        toast("This action is outside the local sync prototype.");
-      }
-    },
-    true,
-  );
   function action(fn) {
     return () =>
       Promise.resolve()

@@ -1,4 +1,4 @@
-/* Test-only server timers: changes require a connection; countdowns remain local. */
+/* Synchronized server timers: changes require a connection; countdowns remain local. */
 (()=>{
  const sync=window.prototypeSync;let pending=false;
  const heard=new Set(JSON.parse(sessionStorage.getItem('little-wins-timer-alarms')||'[]'));
@@ -8,11 +8,11 @@
  const oldPersist=persist;
  persist=function(){for(const t of state.timers)if(t.rang)heard.add(t.id);sessionStorage.setItem('little-wins-timer-alarms',JSON.stringify([...heard].slice(-500)));return oldPersist();};
  const oldOpenForm=openForm;
- openForm=function(type,id){oldOpenForm(type,id);if(type==='chore'&&id&&window.timerSyncVersion===1){$('timerRequired').disabled=false;$('minutes').max=120;updateTimerField();}};
+ openForm=function(type,id){oldOpenForm(type,id);if(type==='chore'&&window.timerSyncVersion===1){$('timerRequired').disabled=false;$('minutes').max=120;updateTimerField();}};
  async function act(button){
   if(pending)return;
   if(!navigator.onLine){toast('Connect to the internet to change or check off a synchronized timer.');return;}
-  if(window.timerSyncVersion!==1){toast('The timer-sync database update is not installed in this test environment.');return;}
+  if(window.timerSyncVersion!==1){toast('The timer-sync database update is required.');return;}
   if(checkChildSession()||!sync.connection.sessionToken||(!parentMode&&childSession!==state.active)){toast('Sign in again before using this timer.');return;}
   pending=true;button.disabled=true;
   try{

@@ -13,7 +13,7 @@
  function primitives(value){
   if(!object(value))fail('A backup record is invalid.');
   for(const [key,v] of Object.entries(value)){
-   if(['__proto__','constructor','prototype'].includes(key)||v!==null&&(!['string','number','boolean'].includes(typeof v)||typeof v==='number'&&!Number.isSafeInteger(v)||typeof v==='string'&&v.length>500))fail('An unsupported backup record was found. Nothing has been replaced.');
+   if(['__proto__','constructor','prototype'].includes(key)||v!==null&&(!['string','number','boolean'].includes(typeof v)||typeof v==='number'&&!Number.isSafeInteger(v)||typeof v==='string'&&v.length>(key==='icon'?18000:500)))fail('An unsupported backup record was found. Nothing has been replaced.');
   }
   return clone(value);
  }
@@ -44,7 +44,7 @@
   const ids=new Set();
   for(const k of ['members','archivedMembers'])s[k]=s[k].map(m=>{
    m=primitives(m);if(!id(m.id)||ids.has(m.id)||!text(m.name,100)||!integer(m.points,-1000000000,1000000000)||!integer(m.redemptions??0,0,1000000))fail('Invalid or duplicate child profile.');ids.add(m.id);m.redemptions??=0;
-   for(const f of ['icon','theme','timerSound'])if(m[f]!=null&&!text(m[f],100,true))fail('Invalid child profile setting.');return m;
+   for(const f of ['icon','theme','timerSound'])if(m[f]!=null&&!(f==='icon'&&typeof m[f]==='string'&&m[f].length<=18000&&/^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(m[f]))&&!text(m[f],100,true))fail('Invalid child profile setting.');return m;
   });
   const activeIds=new Set(s.members.map(m=>m.id));s.active=activeIds.has(source.active)?source.active:s.members[0].id;
   for(const k of ['chores','rewards']){

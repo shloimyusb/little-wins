@@ -8,7 +8,7 @@
   dialog.id = "pwaInstallDialog";
   dialog.className = "pwa-install-dialog";
   dialog.innerHTML =
-    '<img class="install-icon" src="./icons/icon-180.png" alt="Little Wins icon"><h2>Little Wins on your Home Screen</h2><p>Open this page in Safari on your iPhone or iPad, then:</p><ol><li>Tap Safari’s <b>Share</b> button (the square with an upward arrow).</li><li>Choose <b>Add to Home Screen</b> (you may need to scroll down).</li><li>Tap <b>Add</b>, then open Little Wins from its new icon.</li></ol><p id="pwaOfflineStatus" class="pwa-status-note">Preparing offline access…</p><p style="font-size:12px">Saved changes stay on this device until synced. Keep the app open for timer sounds; sounds while locked are not supported in this preview.</p><div class="actions"><button type="button" id="pwaInstallDone" class="btn primary">Done</button></div>';
+    '<img class="install-icon" src="./icons/icon-180.png" alt="Little Wins icon"><h2>Little Wins on your Home Screen</h2><p>Open this page in Safari on your iPhone or iPad, then:</p><ol><li>Tap Safari’s <b>Share</b> button (the square with an upward arrow).</li><li>Choose <b>Add to Home Screen</b> (you may need to scroll down).</li><li>Tap <b>Add</b>, then open Little Wins from its new icon.</li></ol><p id="pwaOfflineStatus" class="pwa-status-note">Preparing offline access…</p><p style="font-size:12px">Saved changes stay on this device until synced. Keep the app open for timer sounds; timer sounds cannot play while this web app is closed or the device is locked.</p><div class="actions"><button type="button" id="pwaInstallDone" class="btn primary">Done</button></div>';
   document.body.append(dialog);
   document.getElementById("pwaInstallDone").onclick = () => dialog.close();
   const link = document.createElement("button");
@@ -72,7 +72,7 @@
   };
   if (!isSecureContext || !("serviceWorker" in navigator)) {
     status(
-      "Offline installation needs an HTTPS address. This local preview does not yet have a public iPhone link.",
+      "Open Little Wins using its secure HTTPS address to install it.",
       true,
     );
     return;
